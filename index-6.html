@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vertex Math Program (VMP) — A Monthly Math Club</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&display=swap');
+
+  :root{
+    --ink:#1a1f2e;          /* near-black text */
+    --muted:#5b6478;        /* secondary text */
+    --blue:#3b5bdb;         /* calm blue accent */
+    --blue-deep:#2f49b0;
+    --blue-soft:#eef2ff;    /* pale blue tint */
+    --white:#ffffff;
+    --paper:#fbfcfe;        /* barely-off-white */
+    --line:#e4e8f0;
+    --line-strong:#d3d9e6;
+    --serif:"Times New Roman",Times,Georgia,serif;
+    --display:"Space Grotesk",-apple-system,sans-serif;
+    --radius:12px;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+
+  body{
+    font-family:var(--display);
+    background:var(--paper);
+    color:var(--ink);
+    line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+    font-size:18px;
+  }
+
+  .wrap{max-width:1060px;margin:0 auto;padding:0 24px;}
+
+  /* ---------- NAV ---------- */
+  nav{
+    position:sticky;top:0;z-index:50;
+    background:rgba(238,242,255,0.85);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+  }
+  nav .wrap{display:flex;align-items:center;justify-content:space-between;height:68px;}
+  .brand{
+    font-family:var(--display);
+    font-weight:700;font-size:1.12rem;letter-spacing:-0.01em;
+    display:flex;align-items:center;gap:11px;
+  }
+  .logo-mark{width:26px;height:auto;flex-shrink:0;display:block;color:var(--blue);}
+  .nav-links{display:flex;gap:30px;font-family:var(--display);font-size:0.92rem;font-weight:500;}
+  .nav-links a{color:var(--muted);text-decoration:none;transition:color .15s;}
+  .nav-links a:hover{color:var(--blue);}
+  @media(max-width:680px){.nav-links{display:none;}}
+
+  /* ---------- HERO ---------- */
+  .hero{
+    padding:80px 0 72px;position:relative;overflow:hidden;
+    background:linear-gradient(180deg,var(--blue-soft) 0%,var(--paper) 100%);
+    border-bottom:1px solid var(--line);
+  }
+  .hero-grid{display:grid;grid-template-columns:1.1fr 0.9fr;gap:56px;align-items:center;}
+  @media(max-width:860px){.hero-grid{grid-template-columns:1fr;gap:40px;}}
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:9px;
+    font-size:0.9rem;letter-spacing:0.02em;
+    color:var(--blue);background:var(--blue-soft);
+    padding:7px 15px;border-radius:100px;
+    margin-bottom:26px;font-style:italic;
+  }
+  .eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--blue);}
+  .hero-copy .eyebrow,.hero-copy h1,.hero-copy .lede{font-family:var(--serif);}
+  h1{
+    font-weight:700;
+    font-size:clamp(3.4rem,6.5vw,5.4rem);
+    line-height:1.03;letter-spacing:-0.025em;
+    margin-bottom:24px;
+  }
+  h1 .curve{color:var(--blue);font-style:italic;}
+  .lede{
+    font-size:clamp(1.12rem,1.6vw,1.28rem);
+    max-width:520px;margin-bottom:32px;color:var(--muted);
+  }
+  .hero-actions{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-bottom:34px;}
+  .btn-primary{
+    font-family:var(--display);font-weight:700;font-size:1.08rem;
+    text-decoration:none;color:var(--white);background:var(--blue);
+    padding:14px 28px;border-radius:10px;transition:background .15s, transform .12s;
+  }
+  .btn-primary:hover{background:var(--blue-deep);transform:translateY(-2px);}
+  .btn-ghost{
+    font-family:var(--display);font-weight:700;font-size:1.08rem;
+    text-decoration:none;color:var(--ink);
+    padding:14px 8px;transition:color .15s;
+  }
+  .btn-ghost:hover{color:var(--blue);}
+  .hero-meta{display:flex;flex-wrap:wrap;gap:9px;}
+  .chip{
+    font-size:0.92rem;color:var(--muted);
+    background:var(--white);border:1px solid var(--line-strong);
+    padding:7px 15px;border-radius:100px;
+    display:inline-flex;align-items:center;gap:8px;
+  }
+  .chip .dot{width:6px;height:6px;border-radius:50%;background:var(--blue);}
+
+  /* hero visual card */
+  .hero-card{
+    background:var(--white);border:1px solid var(--line);border-radius:20px;
+    padding:36px 34px;box-shadow:0 24px 50px -28px rgba(26,31,46,0.28);
+    position:relative;overflow:hidden;
+  }
+  .hero-card::before{
+    content:"";position:absolute;top:-70px;right:-70px;width:200px;height:200px;
+    background:radial-gradient(circle,var(--blue-soft),transparent 70%);
+  }
+  .hc-logo{width:44px;height:auto;color:var(--blue);margin-bottom:18px;position:relative;}
+  .hc-title{font-family:var(--serif);font-weight:700;font-size:1.5rem;letter-spacing:-0.005em;margin-bottom:4px;position:relative;}
+  .hc-sub{font-size:1.05rem;color:var(--muted);font-style:italic;margin-bottom:8px;position:relative;}
+  .hc-list{list-style:none;position:relative;}
+  .hc-list li{
+    display:flex;align-items:center;gap:18px;
+    padding:18px 0;border-bottom:1px solid var(--line);
+  }
+  .hc-list li:last-child{border-bottom:none;}
+  .hc-num{
+    font-style:italic;color:var(--blue);font-size:1.05rem;font-weight:700;
+    width:34px;flex-shrink:0;
+  }
+  .hc-text{display:flex;flex-direction:column;gap:1px;}
+  .hc-month{font-weight:700;font-size:1.18rem;letter-spacing:-0.01em;line-height:1.25;}
+  .hc-topic{font-size:1.02rem;color:var(--muted);line-height:1.25;}
+
+  /* ---------- SECTION ---------- */
+  .sec{padding:64px 0;}
+  .sec-label{
+    font-size:0.9rem;letter-spacing:0.08em;text-transform:uppercase;
+    color:var(--blue);margin-bottom:18px;font-weight:700;
+  }
+  h2{
+    font-family:var(--serif);
+    font-weight:700;
+    font-size:clamp(2rem,4vw,2.8rem);letter-spacing:-0.01em;
+    margin-bottom:16px;line-height:1.1;
+  }
+
+  /* ---------- REGISTRATION ---------- */
+  .reg-intro{max-width:620px;font-size:1.15rem;color:var(--muted);margin-bottom:42px;}
+  .units{display:grid;grid-template-columns:repeat(2,1fr);gap:22px;}
+  @media(max-width:720px){.units{grid-template-columns:1fr;}}
+
+  .unit{
+    background:var(--white);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:30px 28px 26px;
+    position:relative;
+    box-shadow:0 1px 3px rgba(26,31,46,0.04);
+    transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+    display:flex;flex-direction:column;
+  }
+  .unit:hover{
+    transform:translateY(-4px);
+    box-shadow:0 16px 34px -18px rgba(59,91,219,0.35);
+    border-color:var(--blue);
+  }
+  .unit-top{display:flex;align-items:baseline;margin-bottom:8px;}
+  .unit-month{font-weight:700;font-size:1rem;color:var(--blue);letter-spacing:0.02em;text-transform:uppercase;}
+  .unit-topic{
+    font-family:var(--serif);
+    font-weight:700;font-size:1.7rem;letter-spacing:-0.01em;
+    line-height:1.1;margin-bottom:12px;
+  }
+  .unit-desc{font-size:1.05rem;color:var(--muted);margin-bottom:18px;flex:1;}
+  .unit-when{
+    display:flex;align-items:center;gap:14px;
+    background:var(--blue-soft);border:1px solid #d7defb;border-radius:10px;
+    padding:12px 14px;margin-bottom:20px;
+  }
+  .unit-when .cal-chip{
+    flex-shrink:0;width:46px;text-align:center;background:var(--blue);color:var(--white);
+    border-radius:8px;padding:4px 0 5px;
+  }
+  .unit-when .cal-chip .m{font-family:var(--display);font-size:0.6rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;line-height:1;}
+  .unit-when .cal-chip .d{font-family:var(--serif);font-weight:700;font-size:1.35rem;line-height:1.05;}
+  .unit-when .wt{display:flex;flex-direction:column;gap:2px;}
+  .unit-when .wt .date{font-family:var(--display);font-weight:700;font-size:0.95rem;color:var(--ink);}
+  .unit-when .wt .place{font-family:var(--display);font-size:0.85rem;color:var(--muted);}
+  .unit-formula{position:absolute;top:30px;right:28px;font-style:italic;font-size:1rem;color:var(--blue);opacity:0.4;}
+  .unit-cta{
+    font-family:var(--display);font-weight:700;font-size:1.05rem;
+    text-decoration:none;color:var(--white);background:var(--blue);
+    padding:13px 20px;border-radius:9px;text-align:center;
+    transition:background .15s;
+  }
+  .unit-cta:hover{background:var(--blue-deep);}
+
+  /* ---------- WEEKLY PROBLEM ---------- */
+  .problem-card{
+    background:var(--ink);color:var(--white);
+    border-radius:16px;
+    padding:48px 46px;position:relative;overflow:hidden;
+  }
+  @media(max-width:640px){.problem-card{padding:36px 26px;}}
+  .pc-eyebrow{
+    font-size:0.9rem;letter-spacing:0.06em;text-transform:uppercase;
+    color:#9db2f5;margin-bottom:20px;
+    display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-weight:700;
+  }
+  .pc-eyebrow .wk{background:var(--blue);color:var(--white);padding:4px 13px;border-radius:100px;letter-spacing:0.04em;}
+  .problem-statement{font-size:clamp(1.35rem,2.7vw,1.85rem);line-height:1.4;max-width:740px;margin-bottom:16px;}
+  .problem-statement .math{font-style:italic;color:#b9c8fa;}
+  .problem-note{color:#aab3c9;font-size:1.05rem;margin-bottom:30px;}
+  .problem-actions{display:flex;flex-wrap:wrap;gap:16px;align-items:center;}
+  .problem-actions .submit{
+    font-family:var(--display);font-weight:700;font-size:1.05rem;
+    background:var(--white);color:var(--ink);text-decoration:none;
+    padding:13px 26px;border-radius:9px;transition:background .15s, color .15s;
+  }
+  .problem-actions .submit:hover{background:var(--blue);color:var(--white);}
+  .problem-actions .sub-note{font-size:0.95rem;color:#8590a8;font-style:italic;}
+  .prob-arc{position:absolute;right:-40px;bottom:-50px;width:200px;height:auto;opacity:0.08;color:var(--white);pointer-events:none;}
+
+  /* ---------- ABOUT ---------- */
+  .about-grid{display:grid;grid-template-columns:1.05fr 1fr;gap:52px;align-items:start;}
+  @media(max-width:760px){.about-grid{grid-template-columns:1fr;gap:34px;}}
+  .about-grid p{font-size:1.18rem;color:var(--muted);margin-bottom:18px;}
+  .about-grid p em{color:var(--ink);font-style:italic;}
+  .feature-list{list-style:none;display:flex;flex-direction:column;}
+  .feature-list li{
+    display:flex;gap:16px;align-items:baseline;
+    padding:17px 0;border-bottom:1px solid var(--line);font-size:1.08rem;
+  }
+  .feature-list li:last-child{border-bottom:none;}
+  .feature-list .k{
+    font-weight:700;font-size:0.95rem;color:var(--blue);font-style:italic;
+    flex-shrink:0;width:26px;
+  }
+
+  /* ---------- DETAILS ---------- */
+  .strip{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--white);}
+  @media(max-width:760px){.strip{grid-template-columns:repeat(2,1fr);}}
+  .strip .item{padding:26px 24px;border-right:1px solid var(--line);}
+  .strip .item:last-child{border-right:none;}
+  @media(max-width:760px){
+    .strip .item:nth-child(2){border-right:none;}
+    .strip .item:nth-child(1),.strip .item:nth-child(2){border-bottom:1px solid var(--line);}
+  }
+  .strip .item .lab{font-size:0.85rem;letter-spacing:0.05em;text-transform:uppercase;color:var(--blue);margin-bottom:8px;font-weight:700;}
+  .strip .item .val{font-weight:700;font-size:1.3rem;letter-spacing:-0.01em;}
+
+  /* ---------- CONTACT ---------- */
+  .contact-cta{
+    display:inline-block;margin-top:10px;
+    font-family:var(--display);font-weight:700;font-size:1.1rem;
+    background:var(--blue);color:var(--white);text-decoration:none;
+    padding:15px 30px;border-radius:10px;transition:background .15s;
+  }
+  .contact-cta:hover{background:var(--blue-deep);}
+
+  /* ---------- SCHEDULE / CALENDAR ---------- */
+  .cal-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
+  @media(max-width:760px){.cal-grid{grid-template-columns:repeat(2,1fr);}}
+  @media(max-width:440px){.cal-grid{grid-template-columns:1fr;}}
+  .cal{
+    background:var(--white);border:1px solid var(--line);border-radius:14px;overflow:hidden;
+    transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+  }
+  .cal:hover{transform:translateY(-4px);box-shadow:0 16px 34px -20px rgba(59,91,219,0.4);border-color:var(--blue);}
+  .cal-top{background:var(--blue);color:var(--white);padding:14px 0 12px;text-align:center;}
+  .cal-top .mo{font-family:var(--display);font-size:0.74rem;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;opacity:0.85;}
+  .cal-top .dy{font-family:var(--serif);font-weight:700;font-size:2.8rem;line-height:1;margin-top:2px;}
+  .cal-body{padding:18px 18px 20px;text-align:center;}
+  .cal-body .dow{font-family:var(--display);font-size:0.78rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
+  .cal-body .contest{font-family:var(--serif);font-weight:700;font-size:1.25rem;letter-spacing:-0.01em;margin-bottom:12px;}
+  .cal-body .meta{font-family:var(--display);font-size:0.86rem;color:var(--muted);line-height:1.5;}
+  .cal-body .meta .t{color:var(--ink);font-weight:700;}
+
+  /* instagram in footer */
+  .foot-social{margin-top:8px;}
+  .foot-social a{display:inline-flex;align-items:center;gap:10px;color:#c7cdda;text-decoration:none;font-size:1.02rem;transition:color .15s;}
+  .foot-social a:hover{color:var(--white);}
+  .foot-social svg{width:18px;height:18px;stroke:#9db2f5;fill:none;stroke-width:2;flex-shrink:0;}
+
+  /* ---------- ABOUT (feature-grid style) ---------- */
+  .about2{display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:start;}
+  @media(max-width:860px){.about2{grid-template-columns:1fr;gap:44px;}}
+  .about2-label{font-family:var(--display);font-size:0.82rem;letter-spacing:0.14em;color:var(--muted);margin-bottom:20px;}
+  .about2 h2{margin-bottom:24px;}
+  .about2-body p{font-size:1.12rem;color:var(--muted);line-height:1.6;margin-bottom:22px;}
+  .about2-quote{
+    border-left:3px solid var(--blue);padding:4px 0 4px 22px;margin:28px 0;
+    font-size:1.18rem;font-weight:700;color:var(--ink);line-height:1.4;
+  }
+  .about2-tag{
+    display:inline-block;font-family:var(--display);font-size:0.85rem;letter-spacing:0.1em;
+    color:var(--muted);background:var(--paper-2,#ece6d8);background:#eef0f4;
+    border:1px solid var(--line);padding:12px 20px;border-radius:4px;margin-top:6px;
+  }
+  .about2-tag b{color:var(--ink);font-weight:700;letter-spacing:0.06em;}
+  .feat-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;}
+  @media(max-width:480px){.feat-grid{grid-template-columns:1fr;}}
+  .feat{padding:0 28px 34px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);}
+  .feat:nth-child(2n){border-right:none;padding-right:0;}
+  .feat:nth-child(2n+1){padding-left:0;}
+  .feat:nth-last-child(-n+2){border-bottom:none;padding-bottom:0;}
+  .feat:nth-child(-n+2){padding-top:0;}
+  .feat:nth-child(n+3){padding-top:34px;}
+  @media(max-width:480px){.feat{border-right:none;padding-left:0;padding-right:0;}}
+  .feat-icon{
+    width:48px;height:48px;border:1px solid var(--line-strong);border-radius:8px;
+    display:flex;align-items:center;justify-content:center;margin-bottom:22px;
+  }
+  .feat-icon svg{width:22px;height:22px;stroke:var(--blue);fill:none;stroke-width:1.8;}
+  .feat h3{font-family:var(--serif);font-weight:700;font-size:1.3rem;letter-spacing:-0.005em;margin-bottom:10px;}
+  .feat p{color:var(--muted);font-size:1rem;line-height:1.5;}
+  .why-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin-bottom:56px;}
+  @media(max-width:640px){.why-stats{grid-template-columns:1fr;}}
+  .why-stat{padding:40px 24px;text-align:center;border-right:1px solid var(--line);}
+  .why-stat:last-child{border-right:none;}
+  @media(max-width:640px){.why-stat{border-right:none;border-bottom:1px solid var(--line);}.why-stat:last-child{border-bottom:none;}}
+  .why-stat .num{font-family:var(--serif);font-weight:700;font-size:3.2rem;line-height:1;letter-spacing:-0.02em;margin-bottom:10px;}
+  .why-stat .lbl{font-size:0.82rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);}
+  .why-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:0;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--white);}
+  @media(max-width:680px){.why-grid{grid-template-columns:1fr;}}
+  .why-item{padding:34px 32px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);}
+  .why-item:nth-child(2n){border-right:none;}
+  .why-item:nth-last-child(-n+2){border-bottom:none;}
+  @media(max-width:680px){.why-item{border-right:none;}.why-item:nth-last-child(2){border-bottom:1px solid var(--line);}}
+  .why-icon{
+    width:46px;height:46px;border:1px solid var(--line-strong);border-radius:10px;
+    display:flex;align-items:center;justify-content:center;margin-bottom:20px;color:var(--blue);
+  }
+  .why-icon svg{width:24px;height:24px;stroke:var(--blue);fill:none;stroke-width:1.8;}
+  .why-item h3{font-family:var(--serif);font-weight:700;font-size:1.35rem;letter-spacing:-0.005em;margin-bottom:10px;}
+  .why-item p{color:var(--muted);font-size:1.02rem;line-height:1.55;}
+  .loc-grid{display:grid;grid-template-columns:0.9fr 1.1fr;gap:40px;align-items:stretch;}
+  @media(max-width:820px){.loc-grid{grid-template-columns:1fr;gap:28px;}}
+  .loc-info{display:flex;flex-direction:column;justify-content:center;}
+  .loc-info h2{margin-bottom:18px;}
+  .loc-detail{margin-bottom:22px;}
+  .loc-detail .lbl{font-size:0.82rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--blue);font-weight:700;margin-bottom:5px;}
+  .loc-detail .val{font-size:1.15rem;font-weight:700;line-height:1.35;}
+  .loc-detail .sub{color:var(--muted);font-size:1.02rem;}
+  .loc-hours{border-top:1px solid var(--line);padding-top:18px;margin-top:4px;}
+  .loc-hours .row{display:flex;justify-content:space-between;font-size:0.98rem;padding:3px 0;color:var(--muted);max-width:320px;}
+  .loc-hours .row span:first-child{font-weight:700;color:var(--ink);}
+  .map-frame{
+    border:1px solid var(--line);border-radius:16px;overflow:hidden;
+    box-shadow:0 20px 44px -26px rgba(26,31,46,0.3);min-height:360px;position:relative;
+  }
+  .map-frame iframe{width:100%;height:100%;min-height:360px;border:0;display:block;filter:grayscale(0.2) contrast(1.02);}
+  .map-pin-note{
+    position:absolute;left:16px;bottom:16px;background:var(--white);
+    border:1px solid var(--line);border-radius:10px;padding:10px 14px;
+    box-shadow:0 6px 16px -8px rgba(26,31,46,0.4);max-width:230px;
+  }
+  .map-pin-note .t{font-weight:700;font-size:0.95rem;line-height:1.2;}
+  .map-pin-note .d{color:var(--muted);font-size:0.85rem;}
+
+  /* ---------- BIG FOOTER ---------- */
+  footer{background:var(--ink);color:#c7cdda;padding:68px 0 32px;margin-top:56px;border-top:none;}
+  .foot-cols{display:grid;grid-template-columns:1.4fr 1fr 1.3fr;gap:48px;margin-bottom:48px;}
+  @media(max-width:820px){.foot-cols{grid-template-columns:1fr;gap:36px;}}
+  .foot-brand{font-family:var(--display);font-weight:700;font-size:1.15rem;display:flex;align-items:center;gap:11px;color:var(--white);margin-bottom:18px;}
+  .foot-brand .logo-mark{color:#9db2f5;}
+  .foot-about{font-size:1rem;line-height:1.6;color:#9aa2b4;max-width:320px;}
+  .foot-head{font-family:var(--display);font-size:0.8rem;letter-spacing:0.12em;color:#7d879e;margin-bottom:22px;font-weight:600;}
+  .foot-nav{list-style:none;display:flex;flex-direction:column;gap:14px;}
+  .foot-nav a{color:#c7cdda;text-decoration:none;font-size:1.05rem;transition:color .15s;}
+  .foot-nav a:hover{color:var(--white);}
+  .foot-contact{display:flex;flex-direction:column;gap:16px;}
+  .foot-contact a,.foot-contact .fc-row{display:flex;align-items:center;gap:11px;color:#c7cdda;text-decoration:none;font-size:1.02rem;transition:color .15s;}
+  .foot-contact a:hover{color:var(--white);}
+  .foot-contact svg{width:17px;height:17px;flex-shrink:0;stroke:#9db2f5;}
+  .foot-loc{margin-top:8px;}
+  .foot-loc .fl-head{font-size:0.75rem;letter-spacing:0.1em;text-transform:uppercase;color:#7d879e;margin-bottom:6px;font-weight:600;}
+  .foot-loc .fl-name{color:var(--white);font-weight:700;font-size:1.02rem;}
+  .foot-loc .fl-addr{color:#9aa2b4;font-size:0.95rem;}
+  .foot-bottom{border-top:1px solid #2a3145;padding-top:26px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+  .foot-bottom span{font-family:var(--display);font-size:0.82rem;letter-spacing:0.04em;color:#6b7488;}
+
+  /* ---------- STATS ---------- */
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--white);margin-bottom:8px;}
+  @media(max-width:640px){.stats{grid-template-columns:1fr;}}
+  .stat{padding:34px 28px;text-align:center;border-right:1px solid var(--line);}
+  .stat:last-child{border-right:none;}
+  @media(max-width:640px){.stat{border-right:none;border-bottom:1px solid var(--line);}.stat:last-child{border-bottom:none;}}
+  .stat .num{font-family:var(--serif);font-weight:700;font-size:2.6rem;line-height:1;letter-spacing:-0.02em;margin-bottom:8px;}
+  .stat .lbl{font-size:0.85rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);}
+
+  :focus-visible{outline:3px solid var(--blue);outline-offset:2px;border-radius:4px;}
+  @media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important;}}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <div class="brand">
+      <svg class="logo-mark" viewBox="0 0 240 300" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path fill="currentColor" fill-rule="evenodd" d="M120 30 C 71 30, 31 70, 31 119 L 31 210 L 96 210 L 96 119 C 96 106, 107 95, 120 95 C 133 95, 144 106, 144 119 L 144 210 L 209 210 L 209 119 C 209 70, 169 30, 120 30 Z"/>
+        <circle cx="120" cy="252" r="42" fill="currentColor"/>
+      </svg>
+      Vertex Math Program
+    </div>
+    <div class="nav-links">
+      <a href="#register">Register</a>
+      <a href="#schedule">Schedule</a>
+      <a href="#why">Why Vertex</a>
+      <a href="#about">About</a>
+      <a href="#contact">Contact</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="hero-grid">
+      <div class="hero-copy">
+        <div class="eyebrow"><span class="dot"></span>Math contest prep · Grade 9 – 12</div>
+        <h1>Train.<br>Compete.<br><span class="curve">Excel.</span></h1>
+        <p class="lede">A monthly program preparing students for the CEMC mathematics contests — Gauss, Pascal, Cayley, and Fermat — through authentic past problems, proven strategies, and advanced problem-solving techniques.</p>
+        <div class="hero-actions">
+          <a class="btn-primary" href="#register">See the four sessions</a>
+          <a class="btn-ghost" href="#about">How it works →</a>
+        </div>
+        <div class="hero-meta">
+          <span class="chip"><span class="dot"></span>No cost to attend</span>
+          <span class="chip"><span class="dot"></span>All skill levels</span>
+          <span class="chip"><span class="dot"></span>Grades 9–12</span>
+        </div>
+      </div>
+
+      <div class="hero-card">
+        <svg class="hc-logo" viewBox="0 0 240 300" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path fill="currentColor" fill-rule="evenodd" d="M120 30 C 71 30, 31 70, 31 119 L 31 210 L 96 210 L 96 119 C 96 106, 107 95, 120 95 C 133 95, 144 106, 144 119 L 144 210 L 209 210 L 209 119 C 209 70, 169 30, 120 30 Z"/>
+          <circle cx="120" cy="252" r="42" fill="currentColor"/>
+        </svg>
+        <div class="hc-title">Fall Term at a glance</div>
+        <div class="hc-sub">Four months, four contests.</div>
+        <ul class="hc-list">
+          <li><span class="hc-num">01</span><span class="hc-text"><span class="hc-month">September</span><span class="hc-topic">Gauss Contest Prep</span></span></li>
+          <li><span class="hc-num">02</span><span class="hc-text"><span class="hc-month">October</span><span class="hc-topic">Pascal Contest Prep</span></span></li>
+          <li><span class="hc-num">03</span><span class="hc-text"><span class="hc-month">November</span><span class="hc-topic">Cayley Contest Prep</span></span></li>
+          <li><span class="hc-num">04</span><span class="hc-text"><span class="hc-month">December</span><span class="hc-topic">Fermat Contest Prep</span></span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- REGISTRATION -->
+<section class="sec" id="register">
+  <div class="wrap">
+    <div class="sec-label">Register · Fall Term</div>
+    <h2>Four months, four contests</h2>
+    <p class="reg-intro">Each session prepares students for one CEMC contest, building toward the February contest season. Register for the sessions you wish to attend; each is self-contained, so attendance at one is not required for the next.</p>
+
+    <div class="units">
+
+      <article class="unit">
+        <div class="unit-top"><span class="unit-month">September</span></div>
+        <div class="unit-topic">Gauss Contest</div>
+        <p class="unit-desc">An accessible starting point. Students work through past Gauss problems, develop multiple-choice strategy, and build the speed and pattern recognition that every CEMC contest rewards.</p>
+        <div class="unit-when">
+          <span class="cal-chip"><div class="m">Sep</div><div class="d">19</div></span>
+          <span class="wt">
+            <span class="date">Saturday · 12–2 PM</span>
+            <span class="place">Board Room · City Centre Library</span>
+          </span>
+        </div>
+        <a class="unit-cta" href="https://docs.google.com/forms/d/e/1FAIpQLScSpXZdZpPWSHsyx7yXU1KezZOo1mPCwb86oXM9Z5cVUq8AdA/viewform" target="_blank" rel="noopener">Register for September</a>
+      </article>
+
+      <article class="unit">
+        <div class="unit-top"><span class="unit-month">October</span></div>
+        <div class="unit-topic">Pascal Contest</div>
+        <p class="unit-desc">A step up in difficulty. Students address Pascal-level problems in number theory, geometry, and algebra, and learn to work systematically, estimate, and eliminate answers under time constraints.</p>
+        <div class="unit-when">
+          <span class="cal-chip"><div class="m">Oct</div><div class="d">24</div></span>
+          <span class="wt">
+            <span class="date">Saturday · 12–2 PM</span>
+            <span class="place">Room 127 · City Centre Library</span>
+          </span>
+        </div>
+        <a class="unit-cta" href="https://docs.google.com/forms/d/e/1FAIpQLSfCAnzm3Mw2sVPUQC_0SZMRi1qsLGHxr95kPUtYImQLsRXAtg/viewform" target="_blank" rel="noopener">Register for October</a>
+      </article>
+
+      <article class="unit">
+        <div class="unit-top"><span class="unit-month">November</span></div>
+        <div class="unit-topic">Cayley Contest</div>
+        <p class="unit-desc">The core of the season. Students examine challenging Cayley problems and the recurring contest topics — sequences, functions, and combinatorics — that distinguish a strong performance.</p>
+        <div class="unit-when">
+          <span class="cal-chip"><div class="m">Nov</div><div class="d">21</div></span>
+          <span class="wt">
+            <span class="date">Saturday · 12–2 PM</span>
+            <span class="place">Board Room · City Centre Library</span>
+          </span>
+        </div>
+        <a class="unit-cta" href="https://docs.google.com/forms/d/e/1FAIpQLSfKisT9Wg-Tp05mzXQCcwE_Ewtgt_3thA-PBc5436bh8JYCtA/viewform" target="_blank" rel="noopener">Register for November</a>
+      </article>
+
+      <article class="unit">
+        <div class="unit-top"><span class="unit-month">December</span></div>
+        <div class="unit-topic">Fermat Contest</div>
+        <p class="unit-desc">The season's culminating contest. Students take on advanced Fermat problems that demand deeper reasoning and sustained problem-solving across the full breadth of contest mathematics.</p>
+        <div class="unit-when">
+          <span class="cal-chip"><div class="m">Dec</div><div class="d">19</div></span>
+          <span class="wt">
+            <span class="date">Saturday · 12–2 PM</span>
+            <span class="place">Board Room · City Centre Library</span>
+          </span>
+        </div>
+        <a class="unit-cta" href="https://docs.google.com/forms/d/e/1FAIpQLSf_zDV_d2lJzXPOvxry_qyOYf3QxA-ROhl5O0St75IUlmuiEQ/viewform" target="_blank" rel="noopener">Register for December</a>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<!-- SCHEDULE -->
+<section class="sec" id="schedule">
+  <div class="wrap">
+    <div class="sec-label">Fall Schedule</div>
+    <h2>Mark your calendar</h2>
+    <p class="reg-intro">All sessions run Saturdays, 12–2 PM, at the Coquitlam City Centre Library.</p>
+    <div class="cal-grid">
+      <div class="cal">
+        <div class="cal-top"><div class="mo">September</div><div class="dy">19</div></div>
+        <div class="cal-body">
+          <div class="dow">Saturday</div>
+          <div class="contest">Gauss</div>
+          <div class="meta"><span class="t">12–2 PM</span><br>Board Room</div>
+        </div>
+      </div>
+      <div class="cal">
+        <div class="cal-top"><div class="mo">October</div><div class="dy">24</div></div>
+        <div class="cal-body">
+          <div class="dow">Saturday</div>
+          <div class="contest">Pascal</div>
+          <div class="meta"><span class="t">12–2 PM</span><br>Room 127</div>
+        </div>
+      </div>
+      <div class="cal">
+        <div class="cal-top"><div class="mo">November</div><div class="dy">21</div></div>
+        <div class="cal-body">
+          <div class="dow">Saturday</div>
+          <div class="contest">Cayley</div>
+          <div class="meta"><span class="t">12–2 PM</span><br>Board Room</div>
+        </div>
+      </div>
+      <div class="cal">
+        <div class="cal-top"><div class="mo">December</div><div class="dy">19</div></div>
+        <div class="cal-body">
+          <div class="dow">Saturday</div>
+          <div class="contest">Fermat</div>
+          <div class="meta"><span class="t">12–2 PM</span><br>Board Room</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WEEKLY PROBLEM -->
+<section class="sec" id="problem">
+  <div class="wrap">
+    <div class="sec-label">Problem of the Week</div>
+    <div class="problem-card">
+      <svg class="prob-arc" viewBox="0 0 240 300" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path fill="currentColor" fill-rule="evenodd" d="M120 30 C 71 30, 31 70, 31 119 L 31 210 L 96 210 L 96 119 C 96 106, 107 95, 120 95 C 133 95, 144 106, 144 119 L 144 210 L 209 210 L 209 119 C 209 70, 169 30, 120 30 Z"/>
+        <circle cx="120" cy="252" r="42" fill="currentColor"/>
+      </svg>
+      <div class="pc-eyebrow"><span class="wk">Week 01</span> New problem every week</div>
+      <p class="problem-statement">The integers from <span class="math">1</span> to <span class="math">100</span> are written in a row. How many of them have a digit sum that is a multiple of <span class="math">7</span>?</p>
+      <p class="problem-note">A contest-style problem, no calculator required. Open to all — registration is not required to participate. Submit your solution by email or bring it to the next session.</p>
+      <div class="problem-actions">
+        <a class="submit" href="mailto:vertexmathhw@gmail.com?subject=Problem%20of%20the%20Week%20Solution">Submit your solution →</a>
+        <span class="sub-note">answers to vertexmathhw@gmail.com</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section class="sec" id="about">
+  <div class="wrap">
+    <div class="about2">
+      <div class="about2-body">
+        <div class="about2-label">[ ABOUT THE PROGRAM ]</div>
+        <h2>About Vertex Math Program</h2>
+        <p>Vertex Math Program is a no-cost contest-preparation program based at the Coquitlam City Centre Library, designed for motivated students in Grades 9 – 12 who wish to develop their problem-solving abilities and prepare for the CEMC mathematics contests.</p>
+        <p>Each month targets one contest — Gauss, Pascal, Cayley, and Fermat — through authentic past problems, proven strategies, and the problem-solving techniques that the standard curriculum does not have time to cover. Students may attend to strengthen their skills, address specific gaps, or take on a greater challenge.</p>
+        <div class="about2-quote">Each session is structured to prepare students for the February contest season. No prior contest experience is required.</div>
+        <span class="about2-tag"><b>GRADE 9 – 12</b> &nbsp;|&nbsp; CONTEST PREP</span>
+      </div>
+
+      <div class="feat-grid">
+        <div class="feat">
+          <div class="feat-icon">
+            <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <h3>Small-Group Instruction</h3>
+          <p>Focused sessions that allow for individual guidance and collaborative problem-solving.</p>
+        </div>
+        <div class="feat">
+          <div class="feat-icon">
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15 8.5 22 9.3 17 14 18.2 21 12 17.7 5.8 21 7 14 2 9.3 9 8.5 12 2"/></svg>
+          </div>
+          <h3>Authentic Contest Preparation</h3>
+          <p>Practice with genuine past problems from the Gauss, Pascal, Cayley, and Fermat contests.</p>
+        </div>
+        <div class="feat">
+          <div class="feat-icon">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          </div>
+          <h3>Strategy &amp; Technique</h3>
+          <p>Develop the timing, estimation, and elimination methods essential to performing under time constraints.</p>
+        </div>
+        <div class="feat">
+          <div class="feat-icon">
+            <svg viewBox="0 0 24 24"><path d="M14 9a2 2 0 0 1-2 2H6l-4 4V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2z"/><path d="M18 9h2a2 2 0 0 1 2 2v11l-4-4h-6a2 2 0 0 1-2-2v-1"/></svg>
+          </div>
+          <h3>Open to All Levels</h3>
+          <p>Welcoming to all students at no cost, with no prior contest experience required.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DETAILS -->
+<section class="sec" id="details">
+  <div class="wrap">
+    <div class="sec-label">Details</div>
+    <div class="strip">
+      <div class="item"><div class="lab">Who</div><div class="val">Grade 9 – 12</div></div>
+      <div class="item"><div class="lab">How Often</div><div class="val">Once a Month</div></div>
+      <div class="item"><div class="lab">Cost</div><div class="val">Free</div></div>
+      <div class="item"><div class="lab">Where</div><div class="val">Coquitlam City Library</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section class="sec" id="contact">
+  <div class="wrap">
+    <div class="sec-label">Contact Us</div>
+    <div class="about-grid">
+      <div>
+        <h2>Get in touch</h2>
+        <p>For questions about the program, session details, or registration, students, parents, and educators are welcome to contact us directly.</p>
+        <a class="contact-cta" href="mailto:vertexmathhw@gmail.com">vertexmathhw@gmail.com</a>
+      </div>
+      <ul class="feature-list">
+        <li><span class="k">?</span><span>Questions about grade level or suitability.</span></li>
+        <li><span class="k">✎</span><span>Submission of Problem of the Week solutions.</span></li>
+        <li><span class="k">↗</span><span>Registration assistance and session reminders.</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- WHY CHOOSE -->
+<section class="sec" id="why">
+  <div class="wrap">
+    <div class="sec-label">Why Vertex</div>
+    <h2>Why choose Vertex</h2>
+    <p class="reg-intro">A focused, no-cost program for students seeking to excel in mathematics competitions, grounded in authentic problems and rigorous preparation.</p>
+
+    <div class="why-stats">
+      <div class="why-stat"><div class="num">4</div><div class="lbl">Contests Covered</div></div>
+      <div class="why-stat"><div class="num">100%</div><div class="lbl">Free to Join</div></div>
+      <div class="why-stat"><div class="num">∞</div><div class="lbl">Potential</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- LOCATION -->
+<section class="sec" id="location">
+  <div class="wrap">
+    <div class="sec-label">Find Us</div>
+    <div class="loc-grid">
+      <div class="loc-info">
+        <h2>Where we meet</h2>
+        <div class="loc-detail">
+          <div class="lbl">Location</div>
+          <div class="val">Coquitlam Public Library</div>
+          <div class="sub">City Centre Branch · 1169 Pinetree Way, Coquitlam, BC</div>
+        </div>
+        <div class="loc-detail">
+          <div class="lbl">Getting there</div>
+          <div class="sub">A short walk from Lincoln SkyTrain Station, in the heart of Coquitlam City Centre.</div>
+        </div>
+        <div class="loc-hours">
+          <div class="lbl" style="font-size:0.82rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--blue);font-weight:700;margin-bottom:10px;">Library Hours</div>
+          <div class="row"><span>Mon – Thu</span><span>9 AM – 9 PM</span></div>
+          <div class="row"><span>Friday</span><span>9 AM – 5 PM</span></div>
+          <div class="row"><span>Sat – Sun</span><span>10 AM – 5 PM</span></div>
+        </div>
+      </div>
+      <div class="map-frame">
+        <iframe
+          src="https://www.google.com/maps?q=Coquitlam+Public+Library+City+Centre+Branch,1169+Pinetree+Way,Coquitlam,BC&output=embed"
+          loading="lazy" referrerpolicy="no-referrer-when-downgrade"
+          title="Coquitlam Public Library, City Centre Branch"></iframe>
+        <div class="map-pin-note">
+          <div class="t">Coquitlam Public Library</div>
+          <div class="d">City Centre Branch · 1169 Pinetree Way</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-cols">
+      <div>
+        <div class="foot-brand">
+          <svg class="logo-mark" style="width:26px;" viewBox="0 0 240 300" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path fill="currentColor" fill-rule="evenodd" d="M120 30 C 71 30, 31 70, 31 119 L 31 210 L 96 210 L 96 119 C 96 106, 107 95, 120 95 C 133 95, 144 106, 144 119 L 144 210 L 209 210 L 209 119 C 209 70, 169 30, 120 30 Z"/>
+            <circle cx="120" cy="252" r="42" fill="currentColor"/>
+          </svg>
+          Vertex Math Program
+        </div>
+        <p class="foot-about">Free monthly contest-prep sessions for Grade 9 – 12 students, held at the Coquitlam City Centre Library.</p>
+      </div>
+
+      <div>
+        <div class="foot-head">[ NAVIGATION ]</div>
+        <ul class="foot-nav">
+          <li><a href="#register">Register</a></li>
+          <li><a href="#problem">Weekly Problem</a></li>
+          <li><a href="#about">About</a></li>
+          <li><a href="#location">Find Us</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="foot-head">[ CONTACT ]</div>
+        <div class="foot-contact">
+          <a href="mailto:vertexmathhw@gmail.com">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>
+            vertexmathhw@gmail.com
+          </a>
+          <div class="foot-social">
+            <a href="https://www.instagram.com/vertex.math.club" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><line x1="17.5" y1="6.5" x2="17.5" y2="6.5"/></svg>
+              @vertex.math.club
+            </a>
+          </div>
+          <div class="foot-loc">
+            <div class="fl-head">Location</div>
+            <div class="fl-name">Coquitlam City Centre Library</div>
+            <div class="fl-addr">1169 Pinetree Way, Coquitlam, BC</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="foot-bottom">
+      <span>© 2026 Vertex Math Program. All rights reserved.</span>
+      <span>Coquitlam, BC, Canada</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
